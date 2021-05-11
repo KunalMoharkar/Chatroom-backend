@@ -3,7 +3,9 @@ const app = require('express')();
 const cors = require('cors')
 const server = require('http').createServer(app);
 
+//req body to json
 app.use(express.json())
+//cors for browser requests
 app.use(cors())
 
 
@@ -16,16 +18,27 @@ const io = require('socket.io')(server, {
   });
 
 
+let VALIDATIOR = {};
+
 
 //this API route will return the unique room ID.
 //current implementaion just returns the requesting sockets ID as room ID
 app.post('/getRoomId', (req, res) => {
-  
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  console.log(req.body);
+  socketId = req.body.socketId;
 
-  console.log(req.body)
-  socketId = req.socketId;
-  res.send({'roomId':socketId});
+
+  VALIDATIOR[socketId] = [];
+  VALIDATIOR[socketId].push(socketId);
+
+  console.log(VALIDATIOR);
+  console.log(socketId);
+  res.json({'roomId':socketId});
 })
+
+
   
 
 //Sockets Events
@@ -35,8 +48,20 @@ io.on('connection', (socket) => {
 socket.on('join-room',(message)=>{
   const username = message.username;
   const roomId = message.roomId;
-  console.log(`socket ${socket.id} -- ${username} joining room ${roomId}`)
-  socket.join(roomId);
+
+  if (VALIDATIOR.hasOwnProperty(roomId)) {
+
+    console.log(`socket ${socket.id} -- ${username} joining room ${roomId}`)
+    socket.join(roomId);
+  
+  }
+  else
+  {
+
+    socket.emit('error',{errorMsg:"invalid room code"});
+    console.log(`invalid room code`)
+
+  }
 
 })
 
