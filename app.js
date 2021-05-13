@@ -46,6 +46,9 @@ app.post('/getRoomId', (req, res) => {
 //Sockets Events
 io.on('connection', (socket) => { 
 
+console.log(`socket ${socket.id} has connected`);
+
+
 //handles join room requests
 socket.on('join-room',(message)=>{
   const username = message.username;
@@ -80,11 +83,55 @@ socket.on('join-room',(message)=>{
 
 //on disconnection kick the client of the room
 socket.on("disconnecting", (reason) => {
+
+  console.log("socket is disconnecting");
+  
   let socketRooms = socket.rooms; 
 
-  let socketRoomsArray = socketRooms.entries();
+  //traversse the room set
+  socketRooms.forEach((roomId) => {
 
-  console.log(socketRoomsArray);
+    if(VALIDATIOR.hasOwnProperty(roomId)) {
+
+      let roomUsers = VALIDATIOR[roomId];
+
+      let index = -1;
+
+      for(let i=0;i<roomUsers.length ;i++)
+      {
+          let socId = roomUsers[i]['socketId'];
+          console.log(socId);
+
+          if(socId === socket.id)
+          {
+            index = i;
+            break;
+          }
+      }
+
+      if(index != -1)
+      {
+        roomUsers.splice(index,1);
+      }
+
+      if(roomUsers.length === 0)
+      {
+        console.log('no one in this room delete it');
+        delete VALIDATIOR[roomId];
+      }
+      else
+      {
+        VALIDATIOR[roomId] = roomUsers;
+        //send the list to all in a room
+        io.to(roomId).emit('participants',{participantsList:VALIDATIOR[roomId]});
+      }
+  
+
+    }
+
+  });
+
+
 
 
 });
