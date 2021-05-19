@@ -4,6 +4,8 @@ const cors = require("cors");
 const short = require("short-uuid");
 const server = require("http").createServer(app);
 
+const PORT = process.env.PORT || 5000
+
 //req body to json
 app.use(express.json());
 //cors for browser requests
@@ -121,4 +123,4 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5000);
+server.listen(PORT);
