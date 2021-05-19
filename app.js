@@ -14,7 +14,7 @@ app.use(cors());
 //sockets.io instance
 const io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
