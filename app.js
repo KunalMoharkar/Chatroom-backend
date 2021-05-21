@@ -21,6 +21,13 @@ const io = require("socket.io")(server, {
 
 let VALIDATIOR = {};
 
+
+app.get("/",(req,res)=>{
+  res.sendFile('index.html', {root: "views" })
+})
+
+
+
 //this API route will return the unique room ID.
 //current implementaion just returns the random uinque string  as room ID
 app.post("/getRoomId", (req, res) => {
